@@ -102,7 +102,7 @@ class Application(tk.Tk):
         for _, row in self.df.iterrows():
             matricula = row["MATRICULA"]
             bruto = row["BRUTO"]
-            centavos = f"{float(bruto):.2f}".split('.')[1]
+            centavos = row["CENTAVOS"]
             self.table.insert("", "end", values=(matricula, bruto, centavos))
 
     def save_file(self):
