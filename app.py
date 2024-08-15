@@ -38,7 +38,7 @@ class Application(tk.Tk):
         self.csv_path_label = ttk.Label(main_frame, text="")
         self.csv_path_label.pack(pady=10)
 
-        # Frame para a tabela e barra de rolagem
+        # Frame para a tabela e barras de rolagem
         table_frame = ttk.Frame(main_frame)
         table_frame.pack(pady=10, fill="both", expand=True)
 
@@ -52,6 +52,12 @@ class Application(tk.Tk):
         self.vsb = ttk.Scrollbar(table_frame, orient="vertical", command=self.table.yview)
         self.table.configure(yscrollcommand=self.vsb.set)
         self.vsb.pack(side="right", fill="y")
+
+        # Barra de rolagem horizontal
+        self.hsb = ttk.Scrollbar(table_frame, orient="horizontal", command=self.table.xview)
+        self.table.configure(xscrollcommand=self.hsb.set)
+        self.hsb.pack(side="bottom", fill="x")
+
         self.table.pack(fill="both", expand=True)
 
         # Botão para salvar o arquivo processado
@@ -80,7 +86,15 @@ class Application(tk.Tk):
         if file_path:
             self.csv_path_label.config(text=file_path)
             try:
-                self.df = pd.read_csv(file_path)
+                # Verifica o tipo de delimitador e converte se necessário
+                with open(file_path, 'r') as f:
+                    first_line = f.readline()
+                    if ';' in first_line:
+                        self.df = pd.read_csv(file_path, delimiter=';', dtype=str)  # Lida com CSV separado por ponto e vírgula
+                        self.df.to_csv(file_path, sep=',', index=False)  # Converte para CSV separado por vírgula
+                    else:
+                        self.df = pd.read_csv(file_path, dtype=str)  # Lê como CSV separado por vírgula
+
                 self.df.columns = [col.strip() for col in self.df.columns]
                 self.validate_columns()
                 self.populate_table()
@@ -91,7 +105,7 @@ class Application(tk.Tk):
                 self.log_message(_("Failed to import CSV file."))
 
     def validate_columns(self):
-        required_columns = ["MATRICULA", "BRUTO"]
+        required_columns = ["MATRICULA", "BRUTO", "CENTAVOS"]
         for col in required_columns:
             if col not in self.df.columns:
                 raise ValueError(_("Missing required column: {}").format(col))
@@ -130,8 +144,8 @@ class Application(tk.Tk):
             matricula = row['MATRICULA']
             numero_doc = random.randint(1000, 9999)
             doc_final = random.randint(1000, 9999)
-            bruto = row['BRUTO']
-            centavos = f"{float(bruto):.2f}".split('.')[1]
+            bruto = row['BRUTO']#.replace('.', ' ')
+            centavos = row['CENTAVOS']#.replace('.', ' ')
 
             tipo_registro_nfs = f"3000|31|00000000000000|PE|{matricula}|6|{numero_doc}||{numero_doc}|{service_date}|{service_date}|{bruto},{centavos}|||||||||9101|||||{matricula}|||{bruto},{centavos}||||"
             parcela_nfs = f"3500|{service_date}|{bruto},{centavos}|||||||||||||||||||"
@@ -154,8 +168,3 @@ class Application(tk.Tk):
 if __name__ == "__main__":
     app = Application()
     app.mainloop()
-
-'''barra de rolagem na janela do aplicativo também
-os centavos nao foram capturados do meu csv e est a coluna toda zerada
-o csv que esta sendo importado deve ser csv separado por virgulas simples (x,x,x)
-se o usuario tentar importar outro tipo de csv, entao converta para esse tipo de csv simples'''
