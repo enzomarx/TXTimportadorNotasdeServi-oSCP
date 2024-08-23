@@ -133,7 +133,7 @@ class Application(tk.Tk):
             bruto = row['BRUTO']
             centavos = f"{float(bruto):.2f}".split('.')[1]
 
-            tipo_registro_nfs = f"3000|31|00000000000000|PE|{matricula}|6|{numero_doc}||{numero_doc}|{service_date}|{service_date}|{bruto},{centavos}|||||||||9101|||||{matricula}|||{bruto},{centavos}||||"
+            tipo_registro_nfs = f"3000|31|00000000000000|PE|1595|6|{numero_doc}||{numero_doc}|{service_date}|{service_date}|{bruto},{centavos}|||||||||9101|||||{matricula}|||{bruto},{centavos}||||"
             parcela_nfs = f"3500|{service_date}|{bruto},{centavos}|||||||||||||||||||"
 
             new_content.append(f"{tipo_registro_nfs}\n{parcela_nfs}\n")
